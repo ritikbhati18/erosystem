@@ -1,0 +1,113 @@
+
+# Users table to store all user types
+
+CREATE TABLE users (
+    user_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'sales_manager', 'labour', 'hr') NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(15)
+);
+
+
+
+# Areas table to store different geographical areas
+
+CREATE TABLE areas (
+    area_id INT PRIMARY KEY AUTO_INCREMENT,
+    area_name ENUM('Noida', 'Delhi', 'Greater Noida') NOT NULL
+);
+
+
+
+#Sales Managers details
+
+CREATE TABLE sales_managers (
+    manager_id INT PRIMARY KEY,
+    area_id INT NOT NULL,
+    joining_date DATE NOT NULL,
+    FOREIGN KEY (manager_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (area_id) REFERENCES areas(area_id)
+);
+
+
+
+#Labour details
+
+CREATE TABLE labours (
+    labour_id INT PRIMARY KEY,
+    manager_id INT NOT NULL,
+    area_id INT NOT NULL,
+    skill_level ENUM('beginner', 'intermediate', 'expert') DEFAULT 'beginner',
+    hourly_rate DECIMAL(10,2) DEFAULT 0.00,
+    FOREIGN KEY (labour_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (manager_id) REFERENCES sales_managers(manager_id),
+    FOREIGN KEY (area_id) REFERENCES areas(area_id)
+);
+
+
+
+#Attendance table
+
+CREATE TABLE attendance (
+    attendance_id INT PRIMARY KEY,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    time_in TIMESTAMP,
+    time_out TIMESTAMP,
+    status ENUM('present', 'absent', 'half-day', 'leave') DEFAULT 'present',
+    location_in VARCHAR(100),
+    location_out VARCHAR(100),
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    UNIQUE KEY unique_attendance (user_id, date)
+);
+
+
+
+#Tasks table
+
+CREATE TABLE tasks (
+    task_id INT PRIMARY KEY ,
+    labour_id INT NOT NULL,
+    manager_id INT NOT NULL,
+    task_name VARCHAR(100) NOT NULL,
+    status ENUM('pending', 'in_progress', 'completed', 'cancelled') DEFAULT 'pending',
+    start_date TIMESTAMP,
+    end_date TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (labour_id) REFERENCES labours(labour_id),
+    FOREIGN KEY (manager_id) REFERENCES sales_managers(manager_id)
+);
+
+
+
+
+#Salary table
+
+CREATE TABLE salary (
+    salary_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    month INT NOT NULL,
+    year INT NOT NULL,
+    basic_salary DECIMAL(10,2) NOT NULL,
+    allowances DECIMAL(10,2) DEFAULT 0.00,
+    deductions DECIMAL(10,2) DEFAULT 0.00,
+    net_salary DECIMAL(10,2) DEFAULT 0.00,
+    status ENUM('pending', 'processed', 'paid') DEFAULT 'pending',
+    UNIQUE KEY unique_salary (user_id, month, year)
+);
+
+
+
+
+#Location tracking table
+
+CREATE TABLE location_tracking (
+    tracking_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    latitude DECIMAL(10,8) NOT NULL,
+    longitude DECIMAL(11,8) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
