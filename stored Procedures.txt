@@ -1,0 +1,60 @@
+Stored Procedures
+
+#Procedure to add new user
+
+DELIMITER //
+CREATE PROCEDURE sp_add_user(
+    IN p_username VARCHAR(50),
+    IN p_password VARCHAR(255),
+    IN p_role ENUM('admin', 'sales_manager', 'labour', 'hr'),
+    IN p_email VARCHAR(100),
+    IN p_phone VARCHAR(15)
+)
+BEGIN
+    INSERT INTO users (username, password, role, email, phone)
+    VALUES (p_username, p_password, p_role, p_email, p_phone);
+END //
+DELIMITER ;
+
+
+# Procedure to assign manager to area
+DELIMITER //
+CREATE PROCEDURE sp_assign_manager_to_area(
+    IN p_manager_id INT,
+    IN p_area_id INT
+)
+BEGIN
+    INSERT INTO sales_managers (manager_id, area_id, joining_date)
+    VALUES (p_manager_id, p_area_id, CURDATE());
+END //
+DELIMITER ;
+
+
+
+#Procedure to record attendance
+
+DELIMITER //
+CREATE PROCEDURE sp_record_attendance(
+    IN p_user_id INT,
+    IN p_date DATE,
+    IN p_time_in TIMESTAMP,
+    IN p_location_in VARCHAR(100)
+)
+BEGIN
+    INSERT INTO attendance (user_id, date, time_in, location_in)
+    VALUES (p_user_id, p_date, p_time_in, p_location_in)
+    ON DUPLICATE KEY UPDATE
+    time_in = p_time_in,
+    location_in = p_location_in;
+END //
+DELIMITER ;
+
+
+
+#Procedure to calculate salary
+DELIMITER //
+CREATE PROCEDURE sp_calculate_salary(
+    IN p_user_id INT,
+    IN p_month INT,
+    IN p_year INT
+)
